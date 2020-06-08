@@ -1,14 +1,8 @@
 package com.luv2code.springboot.thymeleafdemo.jwt;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,8 +16,12 @@ public  class JwtUserDetails implements UserDetails {
   private final String username;
   private final String password;
   private final Collection<? extends GrantedAuthority> authorities;
+  private final boolean AccountNonLocked;
+  private  final boolean Enabled;
+  private final boolean AccountNonExpired;
+  private final boolean CredentialsNonExpired;
 
-  public JwtUserDetails(Long id, String username, String password, String role) {
+  /*public JwtUserDetails(Long id, String username, String password, String role) {
     this.id = id;
     this.username = username;
     this.password = password;
@@ -32,14 +30,28 @@ public  class JwtUserDetails implements UserDetails {
     authorities.add(new SimpleGrantedAuthority(role));
 
     this.authorities = authorities;
-  }
+  }*/
+  
 
   @JsonIgnore
   public Long getId() {
     return id;
   }
 
-  @Override
+  public JwtUserDetails(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities,
+		boolean accountNonLocked, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired) {
+	super();
+	this.id = id;
+	this.username = username;
+	this.password = password;
+	this.authorities = authorities;
+	this.AccountNonLocked = accountNonLocked;
+	this.Enabled = enabled;
+	this.AccountNonExpired = accountNonExpired;
+	this.CredentialsNonExpired = credentialsNonExpired;
+}
+
+@Override
   public String getUsername() {
     return username;
   }

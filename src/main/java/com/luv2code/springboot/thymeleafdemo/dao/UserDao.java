@@ -1,18 +1,23 @@
 package com.luv2code.springboot.thymeleafdemo.dao;
 
-import java.util.Optional;
+import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.luv2code.springboot.thymeleafdemo.entity.DAOUser;
 
 @Repository
-public interface UserDao extends CrudRepository<DAOUser, Integer> {
+public interface UserDao extends JpaRepository<DAOUser, String> {
 
-	com.luv2code.springboot.thymeleafdemo.entity.DAOUser findByUsername(String username);
+	List<DAOUser> findByEmail(String email);
 
-	Optional<DAOUser> findById(Long id);
+	DAOUser findByUsername(String username);
+
+	public void deleteById(Long id);
+
 	
+
 	
+
 }

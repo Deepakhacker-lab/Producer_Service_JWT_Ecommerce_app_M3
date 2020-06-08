@@ -30,8 +30,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private JwtTokenAuthorizationOncePerRequestFilter jwtRequestFilter;
+	
 	@Value("${jwt.get.token.uri}")
-    private String authenticationPath;
+	private String authenticationPath; 
+
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -54,12 +56,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		// We don't need CSRF for this example
-		httpSecurity.csrf().disable()
+		
+		httpSecurity
 				// dont authenticate this particular request
 				.authorizeRequests().antMatchers("/authenticate", "/register").permitAll().
 				// all other requests need to be authenticated
-				anyRequest().authenticated().and().
+				anyRequest()
+			.authenticated().and().
 				// make sure we use stateless session; session won't be used to
 				// store user's state.
 				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
@@ -67,13 +70,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// Add a filter to validate the tokens with every request
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		httpSecurity.authorizeRequests().antMatchers("/swagger-ui.html/")
+		.hasAuthority("ROLE_ADMIN")
+		.and()
+		.csrf()                    
+        .and()
+    .exceptionHandling().accessDeniedPage("/Access_Denied");
 	}
+
+	
+
     @Override
     public void configure(WebSecurity webSecurity) throws Exception {
-        webSecurity
-        .ignoring().antMatchers("/v2/api-docs/**") // enables api docs
-        .and().ignoring().antMatchers("/swagger-ui.html/**")// enable swagger
-        .and().ignoring().antMatchers("/actuator/**")// enables actuators
+       
+    	webSecurity.ignoring()
+        .antMatchers("/v2/api-docs/**") // enables api docs
+        .and()
+        .ignoring().antMatchers("/swagger-ui.html/**")// enable swagger
+        .and()
+        .ignoring().antMatchers("/actuator/**")// enables actuators
         .and().ignoring().antMatchers("/**")
         .and()
             .ignoring()
@@ -86,9 +101,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(
                 HttpMethod.GET,
                 "/" //Other Stuff You want to Ignore
-            )
-            .and()
-            .ignoring()
-            .antMatchers("/h2-console/**/**");//Should not be in Production!
+            );
+           
     }
 }

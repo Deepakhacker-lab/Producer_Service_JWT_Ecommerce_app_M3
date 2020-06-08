@@ -3,6 +3,7 @@ package com.luv2code.springboot.thymeleafdemo.entity;
 public class UserDTO {
 	private String username;
 	private String password;
+	
 	private String role;
 	private String email;
 

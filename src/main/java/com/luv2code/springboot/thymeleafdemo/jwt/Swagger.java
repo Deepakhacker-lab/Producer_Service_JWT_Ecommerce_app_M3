@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.annotation.Secured;
 
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
@@ -17,6 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
+@Secured("ROLE_ADMIN")
 public class Swagger {
 	
 	public static final Contact DEFAULT_CONTACT =
