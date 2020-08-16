@@ -2,6 +2,7 @@ package com.luv2code.springboot.thymeleafdemo.service;
 
 
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,6 +21,9 @@ public class EmailVerificationService implements ApplicationListener<Verificatio
 	private VerificationTokenService Token;
 	@Override
 	public void onApplicationEvent(VerificationCodePublisher event) {
+		
+		org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+		
 		System.err.println("inside Email event");
 		String email= event.getUser().getEmail();
 		System.err.println("got email" +email );
@@ -30,12 +34,11 @@ public class EmailVerificationService implements ApplicationListener<Verificatio
 		SimpleMailMessage mail= new SimpleMailMessage();
 		
 		mail.setSubject("Verification code for your new Account opening with Producer!");
-		mail.setText("Account Code"+VerificationCode );
+		mail.setText("Account Code : "+VerificationCode );
 		mail.setTo(email);
 		
 		mailsender.send(mail);
-		
-		System.err.println("Mail has been send to user");
+		logger.info("Verification code has been send to mail id "+email);
 		
 	}
 

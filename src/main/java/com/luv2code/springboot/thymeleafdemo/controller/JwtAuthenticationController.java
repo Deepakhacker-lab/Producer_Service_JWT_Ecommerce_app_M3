@@ -1,11 +1,16 @@
 package com.luv2code.springboot.thymeleafdemo.controller;
 import java.net.URI;
 
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,12 +29,14 @@ import com.luv2code.springboot.thymeleafdemo.jwt.resources.JwtTokenResponse;
 import com.luv2code.springboot.thymeleafdemo.jwt.resources.VerificationCodePublisher;
 import com.luv2code.springboot.thymeleafdemo.service.JwtUserDetailsService;
 
-@ControllerAdvice
+
+
+
 @RestController
-@CrossOrigin
+@CrossOrigin("http://192.168.99.100")
 public class JwtAuthenticationController {
 
-
+	private final Logger logger = LoggerFactory.getLogger(this.getClass()); 
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -50,13 +57,20 @@ public class JwtAuthenticationController {
 		
 		final String token = jwtTokenUtil.generateToken(userDetails);
 
-		return ResponseEntity.ok(new JwtTokenResponse(token));
+		return ResponseEntity.ok(new JwtTokenResponse(token, userDetails.getAuthorities()));
 		
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<URI> saveUser(@RequestBody UserDTO user) throws Exception {
+	public ResponseEntity<URI> saveUser(@Valid @RequestBody UserDTO user, BindingResult result) throws Exception {
 		System.err.println("Inside save user ");
+		
+		if(result.hasErrors()) {
+			System.err.println("Counts of the Errors are "+ result.getErrorCount());
+			System.err.println("Object name " + result.getObjectName());
+			System.err.println("field name " + result.getFieldError());
+			return ResponseEntity.badRequest().body(null);
+		}
 		
 		DAOUser Created =userDetailsService.save(user);
 		
@@ -66,7 +80,7 @@ public class JwtAuthenticationController {
 				.fromCurrentRequest().path("/{id}/verifaction/{email}").buildAndExpand(Created.getId(),Created.getEmail())
 				.toUri();
 				
-		System.err.println(url);
+		logger.debug("url has been generated successfully"+url);
 		return ResponseEntity.ok().body(url);
 		
 //		return ResponseEntity.ok(userDetailsService.save(user));
@@ -78,7 +92,7 @@ public class JwtAuthenticationController {
 	public ResponseEntity<String> verification(@PathVariable Long id, @PathVariable String email,
 			@RequestBody VerificationToken user) throws Exception {
 		
-		System.err.println("Inside controller method "+ user.getToken());
+		logger.info("Inside controller method "+ user.getToken());
 		
 			return userDetailsService.verify(id, email, user);
 			
@@ -86,13 +100,20 @@ public class JwtAuthenticationController {
 //		return ResponseEntity.ok(userDetailsService.save(user));
 	
 	@DeleteMapping(("/login/{id}"))
-	public ResponseEntity<Void>  Delete(@PathVariable Long id){
-		userDetailsService.deleteById(id);
-		 return ResponseEntity.noContent().build();
+	public ResponseEntity<?>  Delete(@PathVariable Long id){
+		
+		if(userDetailsService.deleteById(id)) {
+			
+			logger.info("USer deleted "+ id);
+			return new ResponseEntity<>("Successfully deleted ", HttpStatus.ACCEPTED);
+		}
+		else {
+			return new ResponseEntity<>("Failed to delete ", HttpStatus.NOT_ACCEPTABLE);
+		}
 		
 //		return ResponseEntity.ok(userDetailsService.save(user));
 	}
-		
-	}
+	
+}
 
 		

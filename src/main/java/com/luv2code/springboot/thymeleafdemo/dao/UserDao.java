@@ -14,7 +14,7 @@ public interface UserDao extends JpaRepository<DAOUser, String> {
 
 	DAOUser findByUsername(String username);
 
-	public void deleteById(Long id);
+	public boolean deleteById(Long id);
 
 	
 

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +22,9 @@ import com.luv2code.springboot.thymeleafdemo.service.EmployeeService;
 
 
 @RestController
-@CrossOrigin("http://localhost:4200")
+@CrossOrigin("${RDS_HOSTNAME:localhost}")
 public class HelloWorldController {
-	
+
 	
 	private EmployeeService producer; 
 	
@@ -33,18 +34,21 @@ public class HelloWorldController {
 		this.producer = producer;
 	}
 	
-	@GetMapping("/hello")
-	public String hello(){
+
 	
-		return "Hello World";
-	}
 	
 	@GetMapping("/hello-world/{name}")
-	public String helloworld(@PathVariable String name){
-		String hello= "welcome "+ name;
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public StringResponse helloworld(@PathVariable String name){
+		StringResponse hello= new StringResponse("welcome "+ name);
 		return hello;
 	}
-
+	@GetMapping("/hello")
+	public StringResponse hello(){
+	
+		return new StringResponse("Hello World");
+	}
+	
 	
 	@GetMapping("/proc")
 	public List<Employee> ProducerDetails(){
@@ -69,6 +73,7 @@ public class HelloWorldController {
 	}
 	
 	@GetMapping("/Update/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public Employee GetProducer(@PathVariable int id) {
 		return producer.findById(id);
 		
@@ -76,6 +81,7 @@ public class HelloWorldController {
 	
 	
 	@PutMapping("/Update/{id}")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Employee> SaveProducer(@PathVariable int id,
 			@RequestBody Employee Employee1){
 		
@@ -85,6 +91,7 @@ public class HelloWorldController {
 		
 	}
 	@PostMapping("/Update")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Void> PostProducer(@RequestBody Employee proc){
 		
 		Employee Created=  producer.save(proc);

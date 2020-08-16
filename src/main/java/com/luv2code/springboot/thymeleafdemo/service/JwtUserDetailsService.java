@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ import com.luv2code.springboot.thymeleafdemo.entity.Role;
 import com.luv2code.springboot.thymeleafdemo.entity.UserDTO;
 import com.luv2code.springboot.thymeleafdemo.entity.VerificationToken;
 import com.luv2code.springboot.thymeleafdemo.entity.verificationCode;
-import com.luv2code.springboot.thymeleafdemo.jwt.JwtUserDetails;
+
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
@@ -48,11 +50,9 @@ public class JwtUserDetailsService implements UserDetailsService {
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
 
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	@Autowired
-	private VerificationTokenService token;
 	
 	public void authenticate(String username, String password) throws Exception {
 		try {
@@ -65,6 +65,8 @@ public class JwtUserDetailsService implements UserDetailsService {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password,authorities));
 			}
 			else {
+				
+				logger.error("User not found in database");
 				throw new UsernameNotFoundException("User not found");
 			}
 		} catch (DisabledException e) {
@@ -85,16 +87,19 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 	            authorities.add(new SimpleGrantedAuthority(roles.getname()));
-
-			return new JwtUserDetails(user.getId(),user.getUsername(), user.getPassword(),authorities,
+	            logger.info("User  found in database");
+			return new org.springframework.security.core.userdetails.User(user.getUsername(),
+					user.getPassword(),
+					user.isEnabled(),
 					user.isAccountNonExpired(), 
-					user.isEnabled(), 
 					user.isAccountNonLocked(),
-					user.isCredentialsNonExpired()
+					user.isCredentialsNonExpired(),
+					authorities
 					);
 		
 		}
 		else {
+			logger.error("User not found in database");
 			throw new UsernameNotFoundException("User not found");
 		}
 	
@@ -151,10 +156,10 @@ public class JwtUserDetailsService implements UserDetailsService {
 	}
 
 	@Transactional
-	public void deleteById(Long id) {
+	public boolean deleteById(Long id) {
 		
 		
-		userDao.deleteById(id);
+		return userDao.deleteById(id);
 		
 		
 	}

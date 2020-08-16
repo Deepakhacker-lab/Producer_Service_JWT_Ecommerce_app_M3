@@ -1,0 +1,6 @@
+management:  endpoints:    web:      exposure:        include:        - refresh
+
+spring:
+  application:
+    name: ProducerApplication  cloud:    config:      uri:      - http://${RDS_HOSTNAME:localhost}:4000
+      fail-fast: true

@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.luv2code.springboot.thymeleafdemo.validator.Username;
+
 
 @Entity
 @Table(name = "user")
@@ -22,6 +24,7 @@ public class DAOUser {
 
 	@Column
 	private String username;
+	
 	@Column
 	
 	private String password;

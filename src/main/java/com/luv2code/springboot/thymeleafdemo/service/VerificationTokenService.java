@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.luv2code.springboot.thymeleafdemo.dao.VerificationTokenRepository;
-import com.luv2code.springboot.thymeleafdemo.entity.DAOUser;
 import com.luv2code.springboot.thymeleafdemo.entity.verificationCode;
 import com.luv2code.springboot.thymeleafdemo.jwt.resources.VerificationCodePublisher;
 

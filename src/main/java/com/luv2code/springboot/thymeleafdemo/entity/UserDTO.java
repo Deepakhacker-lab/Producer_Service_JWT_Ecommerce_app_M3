@@ -1,10 +1,18 @@
 package com.luv2code.springboot.thymeleafdemo.entity;
 
+import com.luv2code.springboot.thymeleafdemo.validator.PasswordValid;
+import com.luv2code.springboot.thymeleafdemo.validator.Username;
+
 public class UserDTO {
+	
+	@Username
 	private String username;
+	
+	@PasswordValid
 	private String password;
 	
 	private String role;
+	
 	private String email;
 
 	public String getRole() {

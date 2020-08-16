@@ -35,12 +35,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private String authenticationPath; 
 
 
+
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// configure AuthenticationManager so that it knows from where to load
 		// user for matching credentials
 		// Use BCryptPasswordEncoder
 		auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+		
+		System.err.println("Inside Auth Manger");
 	}
 
 	@Bean
@@ -56,26 +59,29 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
+		// Add a filter to validate the tokens with every request
 		
 		httpSecurity
 				// dont authenticate this particular request
-				.authorizeRequests().antMatchers("/authenticate", "/register").permitAll().
+				 .authorizeRequests().antMatchers("/authenticate", "/register").permitAll().
 				// all other requests need to be authenticated
 				anyRequest()
-			.authenticated().and().
+			.authenticated().
+			and().
 				// make sure we use stateless session; session won't be used to
 				// store user's state.
 				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-		// Add a filter to validate the tokens with every request
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-		httpSecurity.authorizeRequests().antMatchers("/swagger-ui.html/")
-		.hasAuthority("ROLE_ADMIN")
-		.and()
-		.csrf()                    
-        .and()
-    .exceptionHandling().accessDeniedPage("/Access_Denied");
+		
+//		httpSecurity
+//		.authorizeRequests().antMatchers("/swagger-ui.html/").hasAuthority("ADMIN")
+//		.antMatchers("/hello-world/**").hasAuthority("ADMIN")
+//		.and()
+//		.csrf()                   
+//        .and()
+//    .exceptionHandling().accessDeniedPage("/Access_Denied");
 	}
 
 	
@@ -83,25 +89,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity webSecurity) throws Exception {
        
-    	webSecurity.ignoring()
+    	webSecurity
+    	.ignoring()
         .antMatchers("/v2/api-docs/**") // enables api docs
         .and()
         .ignoring().antMatchers("/swagger-ui.html/**")// enable swagger
         .and()
         .ignoring().antMatchers("/actuator/**")// enables actuators
-        .and().ignoring().antMatchers("/**")
+        .and()
+        .ignoring().antMatchers("/**")
         .and()
             .ignoring()
             .antMatchers(
                 HttpMethod.POST,
-                authenticationPath)
+                authenticationPath,"/update")
             .antMatchers(HttpMethod.OPTIONS, "/**")
             .and()
             .ignoring()
             .antMatchers(
                 HttpMethod.GET,
-                "/" //Other Stuff You want to Ignore
-            );
-           
+                "/products/**" //Other Stuff You want to Ignore
+            )
+            ;           
     }
 }
